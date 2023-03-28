@@ -1,5 +1,6 @@
 import { createContext, useReducer } from "react";
 import AppReducer from "./AppReducer";
+import axios from "axios";
 
 // Initial state
 const initialState = {
@@ -17,12 +18,25 @@ export const GlobalProvider = ({ children }) => {
 
   //   Actions
   async function getTransactions() {
+    // try {
+    //   const res = await fetch("http://localhost:5000/transactions");
+    //   const data = await res.json();
+    //   dispatch({
+    //     type: "GET_TRANSACTION",
+    //     payload: data,
+    //   });
+    // } catch (err) {
+    //   dispatch({
+    //     type: "TRANSACTION_ERROR",
+    //     payload: err.response.data.error,
+    //   });
+    // }
     try {
-      const res = await fetch("http://localhost:5000/transactions");
-      const data = await res.json();
+      const res = await axios.get("api/v1/transactions");
+
       dispatch({
         type: "GET_TRANSACTION",
-        payload: data,
+        payload: res.data.data,
       });
     } catch (err) {
       dispatch({
@@ -34,9 +48,7 @@ export const GlobalProvider = ({ children }) => {
 
   async function deleteTransaction(id) {
     try {
-      await fetch(`http://localhost:5000/transactions/${id}`, {
-        method: "DELETE",
-      });
+      await axios.delete(`/api/v1/transactions/${id}`);
       dispatch({
         type: "DELETE_TRANSACTION",
         payload: id,
@@ -50,19 +62,17 @@ export const GlobalProvider = ({ children }) => {
   }
 
   async function addTransaction(transaction) {
+    const config = {
+      headers: {
+        "Content-type": "application/json",
+      },
+    };
     try {
-      const res = await fetch("http://localhost:5000/transactions", {
-        method: "POST",
-        headers: {
-          "Content-type": "application/json",
-        },
-        body: JSON.stringify(transaction),
-      });
+      const res = await axios.post("api/v1/transactions", transaction, config);
 
-      const data = await res.json();
       dispatch({
         type: "ADD_TRANSACTION",
-        payload: data,
+        payload: res.data.data,
       });
     } catch (err) {
       dispatch({
